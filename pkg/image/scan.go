@@ -101,6 +101,8 @@ func (scanner *Scanner) ScanExisting(existing file.FileBased, file file.SourceFi
 		}
 
 		scanner.PluginCache.ExecutePostHooks(scanner.Ctx, retImage.ID, plugin.ImageUpdatePost, nil, nil)
+	} else {
+		retImage = i
 	}
 
 	return

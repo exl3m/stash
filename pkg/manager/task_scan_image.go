@@ -52,33 +52,33 @@ func (t *ScanTask) scanImage() {
 			logger.Error(err.Error())
 			return
 		}
+	}
 
-		if i != nil {
-			if t.zipGallery != nil {
-				// associate with gallery
-				if err := t.TxnManager.WithTxn(context.TODO(), func(r models.Repository) error {
-					return gallery.AddImage(r.Gallery(), t.zipGallery.ID, i.ID)
-				}); err != nil {
-					logger.Error(err.Error())
-					return
-				}
-			} else if config.GetInstance().GetCreateGalleriesFromFolders() {
-				// create gallery from folder or associate with existing gallery
-				logger.Infof("Associating image %s with folder gallery", i.Path)
-				var galleryID int
-				var isNewGallery bool
-				if err := t.TxnManager.WithTxn(context.TODO(), func(r models.Repository) error {
-					var err error
-					galleryID, isNewGallery, err = t.associateImageWithFolderGallery(i.ID, r.Gallery())
-					return err
-				}); err != nil {
-					logger.Error(err.Error())
-					return
-				}
+	if i != nil {
+		if t.zipGallery != nil {
+			// associate with gallery
+			if err := t.TxnManager.WithTxn(context.TODO(), func(r models.Repository) error {
+				return gallery.AddImage(r.Gallery(), t.zipGallery.ID, i.ID)
+			}); err != nil {
+				logger.Error(err.Error())
+				return
+			}
+		} else if config.GetInstance().GetCreateGalleriesFromFolders() {
+			// create gallery from folder or associate with existing gallery
+			logger.Infof("Associating image %s with folder gallery", i.Path)
+			var galleryID int
+			var isNewGallery bool
+			if err := t.TxnManager.WithTxn(context.TODO(), func(r models.Repository) error {
+				var err error
+				galleryID, isNewGallery, err = t.associateImageWithFolderGallery(i.ID, r.Gallery())
+				return err
+			}); err != nil {
+				logger.Error(err.Error())
+				return
+			}
 
-				if isNewGallery {
-					GetInstance().PluginCache.ExecutePostHooks(t.ctx, galleryID, plugin.GalleryCreatePost, nil, nil)
-				}
+			if isNewGallery {
+				GetInstance().PluginCache.ExecutePostHooks(t.ctx, galleryID, plugin.GalleryCreatePost, nil, nil)
 			}
 		}
 	}
