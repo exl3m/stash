@@ -315,7 +315,24 @@ func (r *mutationResolver) BulkGalleryUpdate(ctx context.Context, input models.B
 
 				// Experiment: token replacement for to original title
 				// Future: Support regex to rewrite titles in bulk
-				newTitle := strings.Replace(*input.Title, "$1", originalGallery.Title.String, -1)
+				newTitle := strings.Replace(*input.Title, "{title}", originalGallery.Title.String, -1)
+
+				if strings.Contains(*input.Title, "{studio}") {
+					studioId := 0
+
+					if input.StudioID != nil && *input.StudioID != "" {
+						studioId, _ = strconv.Atoi(*input.StudioID)
+					} else if originalGallery.StudioID.Valid {
+						studioId = int(originalGallery.StudioID.Int64)
+					}
+
+					if studioId > 0 {
+						studioObj, err := repo.Studio().Find(studioId)
+						if err == nil {
+							newTitle = strings.Replace(newTitle, "{studio}", studioObj.Name.String, -1)
+						}
+					}
+				}
 
 				// if gallery is not zip-based, then generate the checksum from the title
 				if !originalGallery.Path.Valid {
