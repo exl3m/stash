@@ -61,6 +61,7 @@ input GalleryUpdateInput {
 input BulkGalleryUpdateInput {
   clientMutationId: String
   ids: [ID!]
+  title: String
   url: String
   date: String
   details: String

@@ -20,6 +20,7 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
 ) => {
   const intl = useIntl();
   const Toast = useToast();
+  const [title, setTitle] = useState<string>();
   const [rating, setRating] = useState<number>();
   const [studioId, setStudioId] = useState<string>();
   const [
@@ -64,6 +65,10 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
         return gallery.id;
       }),
     };
+
+    if (title !== undefined) {
+      galleryInput.title = title;
+    }
 
     // if rating is undefined
     if (rating === undefined) {
@@ -238,6 +243,7 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
 
   useEffect(() => {
     const state = props.selected;
+    let updateTitle: string | undefined;
     let updateRating: number | undefined;
     let updateStudioID: string | undefined;
     let updatePerformerIds: string[] = [];
@@ -246,6 +252,7 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
     let first = true;
 
     state.forEach((gallery: GQL.SlimGalleryDataFragment) => {
+      const galleryTitle = gallery.title;
       const galleryRating = gallery.rating;
       const GalleriestudioID = gallery?.studio?.id;
       const galleryPerformerIDs = (gallery.performers ?? [])
@@ -254,6 +261,7 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
       const galleryTagIDs = (gallery.tags ?? []).map((p) => p.id).sort();
 
       if (first) {
+        updateTitle = galleryTitle ?? undefined;
         updateRating = galleryRating ?? undefined;
         updateStudioID = GalleriestudioID;
         updatePerformerIds = galleryPerformerIDs;
@@ -261,6 +269,9 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
         updateOrganized = gallery.organized;
         first = false;
       } else {
+        if (galleryTitle !== updateTitle) {
+          updateTitle = undefined;
+        }
         if (galleryRating !== updateRating) {
           updateRating = undefined;
         }
@@ -279,6 +290,7 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
       }
     });
 
+    setTitle(updateTitle);
     setRating(updateRating);
     setStudioId(updateStudioID);
     setExistingPerformerIds(updatePerformerIds);
@@ -376,6 +388,20 @@ export const EditGalleriesDialog: React.FC<IListOperationProps> = (
         isRunning={isUpdating}
       >
         <Form>
+          <Form.Group controlId="title" as={Row}>
+            {FormUtils.renderLabel({
+              title: intl.formatMessage({ id: "title" }),
+            })}
+            <Col xs={9}>
+              <Form.Control
+                id={"title"}
+                className={"text-input"}
+                placeholder={"Bulk Rename, $1"}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+
           <Form.Group controlId="rating" as={Row}>
             {FormUtils.renderLabel({
               title: intl.formatMessage({ id: "rating" }),

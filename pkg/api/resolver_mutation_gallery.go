@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/stashapp/stash/pkg/manager"
@@ -295,6 +296,35 @@ func (r *mutationResolver) BulkGalleryUpdate(ctx context.Context, input models.B
 		for _, galleryIDStr := range input.Ids {
 			galleryID, _ := strconv.Atoi(galleryIDStr)
 			updatedGallery.ID = galleryID
+
+			originalGallery, err := qb.Find(galleryID)
+			if err != nil {
+				return err
+			}
+
+			if originalGallery == nil {
+				return errors.New("not found")
+			}
+
+			// Calculate new title and checksum if it changed
+			if input.Title != nil {
+				// ensure title is not empty
+				if *input.Title == "" {
+					return errors.New("title must not be empty")
+				}
+
+				// Experiment: token replacement for to original title
+				// Future: Support regex to rewrite titles in bulk
+				newTitle := strings.Replace(*input.Title, "$1", originalGallery.Title.String, -1)
+
+				// if gallery is not zip-based, then generate the checksum from the title
+				if !originalGallery.Path.Valid {
+					checksum := utils.MD5FromString(newTitle)
+					updatedGallery.Checksum = &checksum
+				}
+
+				updatedGallery.Title = &sql.NullString{String: newTitle, Valid: true}
+			}
 
 			gallery, err := qb.UpdatePartial(updatedGallery)
 			if err != nil {
