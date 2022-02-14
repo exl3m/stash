@@ -56,6 +56,7 @@ export const ScenePreview: React.FC<IScenePreviewProps> = ({
       <video
         disableRemotePlayback
         playsInline
+        muted={!soundActive}
         className="scene-card-preview-video"
         loop
         preload="none"
@@ -106,6 +107,14 @@ export const SceneCard: React.FC<ISceneCardProps> = (
         {(props.scene.file.duration ?? 0) >= 1
           ? TextUtils.secondsToTimestamp(props.scene.file.duration ?? 0)
           : ""}
+      </div>
+    );
+  }
+
+  function maybeRenderInteractiveSpeedOverlay() {
+    return (
+      <div className="scene-interactive-speed-overlay">
+        {props.scene.interactive_speed ?? ""}
       </div>
     );
   }
@@ -325,6 +334,11 @@ export const SceneCard: React.FC<ISceneCardProps> = (
       }
       linkClassName="scene-card-link"
       thumbnailSectionClassName="video-section"
+      interactiveHeatmap={
+        props.scene.interactive_speed
+          ? props.scene.paths.interactive_heatmap ?? undefined
+          : undefined
+      }
       image={
         <>
           <ScenePreview
@@ -335,6 +349,7 @@ export const SceneCard: React.FC<ISceneCardProps> = (
           />
           <RatingBanner rating={props.scene.rating} />
           {maybeRenderSceneSpecsOverlay()}
+          {maybeRenderInteractiveSpeedOverlay()}
         </>
       }
       overlays={maybeRenderSceneStudioOverlay()}

@@ -21,6 +21,8 @@ import (
 	"github.com/stashapp/stash/pkg/utils"
 )
 
+var officialBuild string
+
 const (
 	Stash         = "stash"
 	Cache         = "cache"
@@ -124,13 +126,14 @@ const (
 	WallShowTitle        = "wall_show_title"
 	defaultWallShowTitle = true
 
-	CustomPerformerImageLocation = "custom_performer_image_location"
-	MaximumLoopDuration          = "maximum_loop_duration"
-	AutostartVideo               = "autostart_video"
-	AutostartVideoOnPlaySelected = "autostart_video_on_play_selected"
-	ContinuePlaylistDefault      = "continue_playlist_default"
-	ShowStudioAsText             = "show_studio_as_text"
-	CSSEnabled                   = "cssEnabled"
+	CustomPerformerImageLocation        = "custom_performer_image_location"
+	MaximumLoopDuration                 = "maximum_loop_duration"
+	AutostartVideo                      = "autostart_video"
+	AutostartVideoOnPlaySelected        = "autostart_video_on_play_selected"
+	autostartVideoOnPlaySelectedDefault = true
+	ContinuePlaylistDefault             = "continue_playlist_default"
+	ShowStudioAsText                    = "show_studio_as_text"
+	CSSEnabled                          = "cssEnabled"
 
 	WallPlayback        = "wall_playback"
 	defaultWallPlayback = "video"
@@ -146,7 +149,6 @@ const (
 	FunscriptOffset = "funscript_offset"
 
 	// Security
-	TrustedProxies                                    = "trusted_proxies"
 	dangerousAllowPublicWithoutAuth                   = "dangerous_allow_public_without_auth"
 	dangerousAllowPublicWithoutAuthDefault            = "false"
 	SecurityTripwireAccessedFromPublicInternet        = "security_tripwire_accessed_from_public_internet"
@@ -167,15 +169,23 @@ const (
 	LogAccess        = "logAccess"
 	defaultLogAccess = true
 
+	// Default settings
+	DefaultScanSettings     = "defaults.scan_task"
 	DefaultIdentifySettings = "defaults.identify_task"
+	DefaultAutoTagSettings  = "defaults.auto_tag_task"
+	DefaultGenerateSettings = "defaults.generate_task"
 
 	DeleteFileDefault             = "defaults.delete_file"
 	DeleteGeneratedDefault        = "defaults.delete_generated"
 	deleteGeneratedDefaultDefault = true
 
 	// Desktop Integration Options
-	NoBrowser        = "noBrowser"
-	NoBrowserDefault = false
+	NoBrowser                           = "noBrowser"
+	NoBrowserDefault                    = false
+	NotificationsEnabled                = "notifications_enabled"
+	NotificationsEnabledDefault         = true
+	ShowOneTimeMovedNotification        = "show_one_time_moved_notification"
+	ShowOneTimeMovedNotificationDefault = false
 
 	// File upload options
 	MaxUploadSize = "max_upload_size"
@@ -207,6 +217,10 @@ func (s *StashBoxError) Error() string {
 	return "Stash-box: " + s.msg
 }
 
+func IsOfficialBuild() bool {
+	return officialBuild == "true"
+}
+
 type Instance struct {
 	// main instance - backed by config file
 	main *viper.Viper
@@ -217,8 +231,9 @@ type Instance struct {
 
 	cpuProfilePath string
 	isNewSystem    bool
-	certFile       string
-	keyFile        string
+	// configUpdates  chan int
+	certFile string
+	keyFile  string
 	sync.RWMutex
 	// deadlock.RWMutex // for deadlock testing/issues
 }
@@ -266,7 +281,25 @@ func (i *Instance) GetNoBrowser() bool {
 	return i.getBool(NoBrowser)
 }
 
+func (i *Instance) GetNotificationsEnabled() bool {
+	return i.getBool(NotificationsEnabled)
+}
+
+// func (i *Instance) GetConfigUpdatesChannel() chan int {
+// 	return i.configUpdates
+// }
+
+// GetShowOneTimeMovedNotification shows whether a small notification to inform the user that Stash
+// will no longer show a terminal window, and instead will be available in the tray, should be shown.
+//  It is true when an existing system is started after upgrading, and set to false forever after it is shown.
+func (i *Instance) GetShowOneTimeMovedNotification() bool {
+	return i.getBool(ShowOneTimeMovedNotification)
+}
+
 func (i *Instance) Set(key string, value interface{}) {
+	// if key == MenuItems {
+	// 	i.configUpdates <- 0
+	// }
 	i.Lock()
 	defer i.Unlock()
 	i.main.Set(key, value)
@@ -826,15 +859,18 @@ func (i *Instance) GetAutostartVideo() bool {
 func (i *Instance) GetAutostartVideoOnPlaySelected() bool {
 	i.Lock()
 	defer i.Unlock()
-	viper.SetDefault(AutostartVideoOnPlaySelected, true)
-	return viper.GetBool(AutostartVideoOnPlaySelected)
+
+	ret := autostartVideoOnPlaySelectedDefault
+	v := i.viper(AutostartVideoOnPlaySelected)
+	if v.IsSet(AutostartVideoOnPlaySelected) {
+		ret = v.GetBool(AutostartVideoOnPlaySelected)
+	}
+
+	return ret
 }
 
 func (i *Instance) GetContinuePlaylistDefault() bool {
-	i.Lock()
-	defer i.Unlock()
-	viper.SetDefault(ContinuePlaylistDefault, false)
-	return viper.GetBool(ContinuePlaylistDefault)
+	return i.getBool(ContinuePlaylistDefault)
 }
 
 func (i *Instance) GetShowStudioAsText() bool {
@@ -949,10 +985,61 @@ func (i *Instance) GetDefaultIdentifySettings() *models.IdentifyMetadataTaskOpti
 	return nil
 }
 
-// GetTrustedProxies returns a comma separated list of ip addresses that should allow proxying.
-// When empty, allow from any private network
-func (i *Instance) GetTrustedProxies() []string {
-	return i.getStringSlice(TrustedProxies)
+// GetDefaultScanSettings returns the default Scan task settings.
+// Returns nil if the settings could not be unmarshalled, or if it
+// has not been set.
+func (i *Instance) GetDefaultScanSettings() *models.ScanMetadataOptions {
+	i.RLock()
+	defer i.RUnlock()
+	v := i.viper(DefaultScanSettings)
+
+	if v.IsSet(DefaultScanSettings) {
+		var ret models.ScanMetadataOptions
+		if err := v.UnmarshalKey(DefaultScanSettings, &ret); err != nil {
+			return nil
+		}
+		return &ret
+	}
+
+	return nil
+}
+
+// GetDefaultAutoTagSettings returns the default Scan task settings.
+// Returns nil if the settings could not be unmarshalled, or if it
+// has not been set.
+func (i *Instance) GetDefaultAutoTagSettings() *models.AutoTagMetadataOptions {
+	i.RLock()
+	defer i.RUnlock()
+	v := i.viper(DefaultAutoTagSettings)
+
+	if v.IsSet(DefaultAutoTagSettings) {
+		var ret models.AutoTagMetadataOptions
+		if err := v.UnmarshalKey(DefaultAutoTagSettings, &ret); err != nil {
+			return nil
+		}
+		return &ret
+	}
+
+	return nil
+}
+
+// GetDefaultGenerateSettings returns the default Scan task settings.
+// Returns nil if the settings could not be unmarshalled, or if it
+// has not been set.
+func (i *Instance) GetDefaultGenerateSettings() *models.GenerateMetadataOptions {
+	i.RLock()
+	defer i.RUnlock()
+	v := i.viper(DefaultGenerateSettings)
+
+	if v.IsSet(DefaultGenerateSettings) {
+		var ret models.GenerateMetadataOptions
+		if err := v.UnmarshalKey(DefaultGenerateSettings, &ret); err != nil {
+			return nil
+		}
+		return &ret
+	}
+
+	return nil
 }
 
 // GetDangerousAllowPublicWithoutAuth determines if the security feature is enabled.
@@ -1126,6 +1213,8 @@ func (i *Instance) setDefaultValues(write bool) error {
 	i.main.SetDefault(Generated, i.main.GetString(Metadata))
 
 	i.main.SetDefault(NoBrowser, NoBrowserDefault)
+	i.main.SetDefault(NotificationsEnabled, NotificationsEnabledDefault)
+	i.main.SetDefault(ShowOneTimeMovedNotification, ShowOneTimeMovedNotificationDefault)
 
 	// Set default scrapers and plugins paths
 	i.main.SetDefault(ScrapersPath, defaultScrapersPath)
@@ -1150,6 +1239,12 @@ func (i *Instance) setExistingSystemDefaults() error {
 		if !i.main.InConfig(NoBrowser) {
 			configDirtied = true
 			i.main.Set(NoBrowser, true)
+		}
+
+		// Existing systems as of the introduction of the taskbar should inform users.
+		if !i.main.InConfig(ShowOneTimeMovedNotification) {
+			configDirtied = true
+			i.main.Set(ShowOneTimeMovedNotification, true)
 		}
 
 		if configDirtied {
@@ -1189,4 +1284,5 @@ func (i *Instance) setInitialConfig(write bool) error {
 
 func (i *Instance) FinalizeSetup() {
 	i.isNewSystem = false
+	// i.configUpdates <- 0
 }

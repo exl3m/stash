@@ -335,7 +335,7 @@ const PerformerTaggerList: React.FC<IPerformerTaggerListProps> = ({
           {modalPerformer && (
             <PerformerModal
               closeModal={() => setModalPerformer(undefined)}
-              modalVisible={modalPerformer !== undefined}
+              modalVisible={modalPerformer.stored_id === performer.id}
               performer={modalPerformer}
               onSave={handlePerformerUpdate}
               excludedPerformerFields={config.excludedPerformerFields}
@@ -640,7 +640,7 @@ export const PerformerTagger: React.FC<ITaggerProps> = ({ performers }) => {
             <h5 className="text-center">
               Please see{" "}
               <HashLink
-                to="/settings?tab=configuration#stashbox"
+                to="/settings?tab=metadata-providers#stash-boxes"
                 scroll={(el) =>
                   el.scrollIntoView({ behavior: "smooth", block: "center" })
                 }

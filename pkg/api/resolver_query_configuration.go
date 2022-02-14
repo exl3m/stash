@@ -2,9 +2,12 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/stashapp/stash/pkg/manager/config"
 	"github.com/stashapp/stash/pkg/models"
+	"github.com/stashapp/stash/pkg/scraper/stashbox"
 	"github.com/stashapp/stash/pkg/utils"
 	"golang.org/x/text/collate"
 )
@@ -83,7 +86,6 @@ func makeConfigGeneralResult() *models.ConfigGeneralResult {
 		Username:                     config.GetUsername(),
 		Password:                     config.GetPasswordHash(),
 		MaxSessionAge:                config.GetMaxSessionAge(),
-		TrustedProxies:               config.GetTrustedProxies(),
 		LogFile:                      &logFile,
 		LogOut:                       config.GetLogOut(),
 		LogLevel:                     config.GetLogLevel(),
@@ -109,6 +111,7 @@ func makeConfigInterfaceResult() *models.ConfigInterfaceResult {
 	wallShowTitle := config.GetWallShowTitle()
 	wallPlayback := config.GetWallPlayback()
 	noBrowser := config.GetNoBrowser()
+	notificationsEnabled := config.GetNotificationsEnabled()
 	maximumLoopDuration := config.GetMaximumLoopDuration()
 	autostartVideo := config.GetAutostartVideo()
 	autostartVideoOnPlaySelected := config.GetAutostartVideoOnPlaySelected()
@@ -121,6 +124,9 @@ func makeConfigInterfaceResult() *models.ConfigInterfaceResult {
 	handyKey := config.GetHandyKey()
 	scriptOffset := config.GetFunscriptOffset()
 
+	// FIXME - misnamed output field means we have redundant fields
+	disableDropdownCreate := config.GetDisableDropdownCreate()
+
 	return &models.ConfigInterfaceResult{
 		MenuItems:                    menuItems,
 		SoundOnPreview:               &soundOnPreview,
@@ -128,6 +134,7 @@ func makeConfigInterfaceResult() *models.ConfigInterfaceResult {
 		WallPlayback:                 &wallPlayback,
 		MaximumLoopDuration:          &maximumLoopDuration,
 		NoBrowser:                    &noBrowser,
+		NotificationsEnabled:         &notificationsEnabled,
 		AutostartVideo:               &autostartVideo,
 		ShowStudioAsText:             &showStudioAsText,
 		AutostartVideoOnPlaySelected: &autostartVideoOnPlaySelected,
@@ -136,9 +143,13 @@ func makeConfigInterfaceResult() *models.ConfigInterfaceResult {
 		CSSEnabled:                   &cssEnabled,
 		Language:                     &language,
 		SlideshowDelay:               &slideshowDelay,
-		DisabledDropdownCreate:       config.GetDisableDropdownCreate(),
-		HandyKey:                     &handyKey,
-		FunscriptOffset:              &scriptOffset,
+
+		// FIXME - see above
+		DisabledDropdownCreate: disableDropdownCreate,
+		DisableDropdownCreate:  disableDropdownCreate,
+
+		HandyKey:        &handyKey,
+		FunscriptOffset: &scriptOffset,
 	}
 }
 
@@ -174,7 +185,45 @@ func makeConfigDefaultsResult() *models.ConfigDefaultSettingsResult {
 
 	return &models.ConfigDefaultSettingsResult{
 		Identify:        config.GetDefaultIdentifySettings(),
+		Scan:            config.GetDefaultScanSettings(),
+		AutoTag:         config.GetDefaultAutoTagSettings(),
+		Generate:        config.GetDefaultGenerateSettings(),
 		DeleteFile:      &deleteFileDefault,
 		DeleteGenerated: &deleteGeneratedDefault,
 	}
+}
+
+func (r *queryResolver) ValidateStashBoxCredentials(ctx context.Context, input models.StashBoxInput) (*models.StashBoxValidationResult, error) {
+	client := stashbox.NewClient(models.StashBox{Endpoint: input.Endpoint, APIKey: input.APIKey}, r.txnManager)
+	user, err := client.GetUser(ctx)
+
+	valid := user != nil && user.Me != nil
+	var status string
+	if valid {
+		status = fmt.Sprintf("Successfully authenticated as %s", user.Me.Name)
+	} else {
+		switch {
+		case strings.Contains(strings.ToLower(err.Error()), "doctype"):
+			// Index file returned rather than graphql
+			status = "Invalid endpoint"
+		case strings.Contains(err.Error(), "request failed"):
+			status = "No response from server"
+		case strings.HasPrefix(err.Error(), "invalid character") ||
+			strings.HasPrefix(err.Error(), "illegal base64 data") ||
+			err.Error() == "unexpected end of JSON input" ||
+			err.Error() == "token contains an invalid number of segments":
+			status = "Malformed API key."
+		case err.Error() == "" || err.Error() == "signature is invalid":
+			status = "Invalid or expired API key."
+		default:
+			status = fmt.Sprintf("Unknown error: %s", err)
+		}
+	}
+
+	result := models.StashBoxValidationResult{
+		Valid:  valid,
+		Status: status,
+	}
+
+	return &result, nil
 }

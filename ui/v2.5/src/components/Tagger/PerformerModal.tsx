@@ -11,7 +11,7 @@ import {
   TruncatedText,
 } from "src/components/Shared";
 import * as GQL from "src/core/generated-graphql";
-import { genderToString, stringToGender } from "src/utils/gender";
+import { stringToGender } from "src/utils/gender";
 
 interface IPerformerModalProps {
   performer: GQL.ScrapedScenePerformerDataFragment;
@@ -188,9 +188,12 @@ const PerformerModal: React.FC<IPerformerModalProps> = ({
       <div className="row">
         <div className="col-7">
           {renderField("name", performer.name)}
+          {renderField("aliases", performer.aliases)}
           {renderField(
             "gender",
-            performer.gender ? genderToString(performer.gender) : ""
+            performer.gender
+              ? intl.formatMessage({ id: "gender_types." + performer.gender })
+              : ""
           )}
           {renderField("birthdate", performer.birthdate)}
           {renderField("death_date", performer.death_date)}

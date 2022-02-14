@@ -12,7 +12,7 @@ import (
 )
 
 type SceneScraper interface {
-	ScrapeScene(sceneID int) (*models.ScrapedScene, error)
+	ScrapeScene(ctx context.Context, sceneID int) (*models.ScrapedScene, error)
 }
 
 type SceneUpdatePostHookExecutor interface {
@@ -34,13 +34,13 @@ type SceneIdentifier struct {
 }
 
 func (t *SceneIdentifier) Identify(ctx context.Context, txnManager models.TransactionManager, scene *models.Scene) error {
-	result, err := t.scrapeScene(scene)
+	result, err := t.scrapeScene(ctx, scene)
 	if err != nil {
 		return err
 	}
 
 	if result == nil {
-		logger.Infof("Unable to identify %s", scene.Path)
+		logger.Debugf("Unable to identify %s", scene.Path)
 		return nil
 	}
 
@@ -57,11 +57,11 @@ type scrapeResult struct {
 	source ScraperSource
 }
 
-func (t *SceneIdentifier) scrapeScene(scene *models.Scene) (*scrapeResult, error) {
+func (t *SceneIdentifier) scrapeScene(ctx context.Context, scene *models.Scene) (*scrapeResult, error) {
 	// iterate through the input sources
 	for _, source := range t.Sources {
 		// scrape using the source
-		scraped, err := source.Scraper.ScrapeScene(scene.ID)
+		scraped, err := source.Scraper.ScrapeScene(ctx, scene.ID)
 		if err != nil {
 			return nil, fmt.Errorf("error scraping from %v: %v", source.Scraper, err)
 		}
@@ -176,7 +176,7 @@ func (t *SceneIdentifier) modifyScene(ctx context.Context, txnManager models.Tra
 
 		// don't update anything if nothing was set
 		if updater.IsEmpty() {
-			logger.Infof("Nothing to set for %s", s.Path)
+			logger.Debugf("Nothing to set for %s", s.Path)
 			return nil
 		}
 

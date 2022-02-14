@@ -4,7 +4,7 @@ import { Badge, Button, Col, Form, Row } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import { uniq } from "lodash";
 import { blobToBase64 } from "base64-blob";
-import distance from "hamming-distance";
+import { distance } from "src/utils/hamming";
 
 import * as GQL from "src/core/generated-graphql";
 import {
@@ -23,6 +23,7 @@ import { OptionalField } from "../IncludeButton";
 import { SceneTaggerModalsState } from "./sceneTaggerModals";
 import PerformerResult from "./PerformerResult";
 import StudioResult from "./StudioResult";
+import { useInitialState } from "src/hooks/state";
 
 const getDurationStatus = (
   scene: IScrapedScene,
@@ -214,7 +215,9 @@ const StashSearchResult: React.FC<IStashSearchResultProps> = ({
   const [excludedFields, setExcludedFields] = useState<Record<string, boolean>>(
     {}
   );
-  const [tagIDs, setTagIDs] = useState<string[]>(getInitialTags());
+  const [tagIDs, setTagIDs, setInitialTagIDs] = useInitialState<string[]>(
+    getInitialTags()
+  );
 
   // map of original performer to id
   const [performerIDs, setPerformerIDs] = useState<(string | undefined)[]>(
@@ -226,8 +229,8 @@ const StashSearchResult: React.FC<IStashSearchResultProps> = ({
   );
 
   useEffect(() => {
-    setTagIDs(getInitialTags());
-  }, [getInitialTags]);
+    setInitialTagIDs(getInitialTags());
+  }, [getInitialTags, setInitialTagIDs]);
 
   useEffect(() => {
     setPerformerIDs(getInitialPerformers());
@@ -566,6 +569,13 @@ const StashSearchResult: React.FC<IStashSearchResultProps> = ({
     </div>
   );
 
+  async function onCreateTag(t: GQL.ScrapedTag) {
+    const newTagID = await createNewTag(t);
+    if (newTagID !== undefined) {
+      setTagIDs([...tagIDs, newTagID]);
+    }
+  }
+
   const renderTagsField = () => (
     <div className="mt-2">
       <div>
@@ -592,7 +602,7 @@ const StashSearchResult: React.FC<IStashSearchResultProps> = ({
             variant="secondary"
             key={t.name}
             onClick={() => {
-              createNewTag(t);
+              onCreateTag(t);
             }}
           >
             {t.name}
@@ -655,7 +665,7 @@ const StashSearchResult: React.FC<IStashSearchResultProps> = ({
 
 export interface ISceneSearchResults {
   target: GQL.SlimSceneDataFragment;
-  scenes: GQL.ScrapedSceneDataFragment[];
+  scenes: IScrapedScene[];
 }
 
 export const SceneSearchResults: React.FC<ISceneSearchResults> = ({
@@ -667,6 +677,8 @@ export const SceneSearchResults: React.FC<ISceneSearchResults> = ({
   useEffect(() => {
     if (!scenes) {
       setSelectedResult(undefined);
+    } else if (scenes.length > 0 && scenes[0].resolved) {
+      setSelectedResult(0);
     }
   }, [scenes]);
 
