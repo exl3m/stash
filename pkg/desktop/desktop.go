@@ -14,7 +14,6 @@ import (
 	"github.com/stashapp/stash/pkg/logger"
 	"github.com/stashapp/stash/pkg/manager/config"
 	"github.com/stashapp/stash/pkg/utils"
-	"golang.org/x/term"
 )
 
 type ShutdownHandler interface {
@@ -50,40 +49,14 @@ func openURLInBrowser(path string) {
 }
 
 func SendNotification(title string, text string) {
-	if IsDesktop() {
-		c := config.GetInstance()
-		if c.GetNotificationsEnabled() {
-			sendNotification(title, text)
-		}
-	}
 }
 
 func IsDesktop() bool {
-	// Check if running under root
-	if os.Getuid() == 0 {
-		return false
-	}
-	// Check if stdin is a terminal
-	if term.IsTerminal(int(os.Stdin.Fd())) {
-		return false
-	}
-	if isService() {
-		return false
-	}
-	if IsServerDockerized() {
-		return false
-	}
-
-	return true
-}
-
-func IsServerDockerized() bool {
-	return isServerDockerized()
+	return false
 }
 
 // Set a command to execute in the background, instead of spawning a shell window
 func HideExecShell(cmd *exec.Cmd) {
-	hideExecShell(cmd)
 }
 
 // writeStashIcon writes the current stash logo to config/icon.png
@@ -123,9 +96,7 @@ func IsAllowedAutoUpdate() bool {
 			return false
 		}
 
-		if isServerDockerized() {
-			return false
-		}
+		return false
 	}
 
 	return true
@@ -136,14 +107,7 @@ func getIconPath() string {
 }
 
 func RevealInFileManager(path string) {
-	exists, err := utils.FileExists(path)
-	if err != nil {
-		logger.Errorf("Error checking file: %s", err)
-		return
-	}
-	if exists && IsDesktop() {
-		revealInFileManager(path)
-	}
+
 }
 
 func getServerURL(path string) string {

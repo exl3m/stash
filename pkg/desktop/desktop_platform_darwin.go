@@ -6,7 +6,6 @@ package desktop
 import (
 	"os/exec"
 
-	"github.com/kermieisinthehouse/gosx-notifier"
 	"github.com/stashapp/stash/pkg/logger"
 )
 
