@@ -342,7 +342,7 @@ func (r *mutationResolver) BulkGalleryUpdate(ctx context.Context, input models.B
 
 				// if gallery is not zip-based, then generate the checksum from the title
 				if !originalGallery.Path.Valid {
-					checksum := utils.MD5FromString(newTitle)
+					checksum := md5.FromString(newTitle)
 					updatedGallery.Checksum = &checksum
 				}
 

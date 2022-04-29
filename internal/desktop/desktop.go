@@ -13,7 +13,6 @@ import (
 	"github.com/stashapp/stash/internal/manager/config"
 	"github.com/stashapp/stash/pkg/fsutil"
 	"github.com/stashapp/stash/pkg/logger"
-	"golang.org/x/term"
 )
 
 type ShutdownHandler interface {
@@ -57,7 +56,7 @@ func IsDesktop() bool {
 }
 
 func IsServerDockerized() bool {
-	return isServerDockerized()
+	return false
 }
 
 // writeStashIcon writes the current stash logo to config/icon.png
@@ -97,7 +96,7 @@ func IsAllowedAutoUpdate() bool {
 			return false
 		}
 
-		if isServerDockerized() {
+		if IsServerDockerized() {
 			return false
 		}
 	}

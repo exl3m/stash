@@ -38,7 +38,7 @@ require (
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
 	golang.org/x/sys v0.0.0-20220329152356-43be30ef3008
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7
 	golang.org/x/tools v0.1.10 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
@@ -50,8 +50,6 @@ require (
 	github.com/go-chi/httplog v0.2.1
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/hashicorp/golang-lru v0.5.4
-	github.com/kermieisinthehouse/gosx-notifier v0.1.1
-	github.com/kermieisinthehouse/systray v1.2.4
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/vearutop/statigz v1.1.6
 	github.com/vektah/gqlparser/v2 v2.4.1

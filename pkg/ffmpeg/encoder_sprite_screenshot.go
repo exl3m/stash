@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"strings"
+	//"github.com/stashapp/stash/pkg/logger"
 )
 
 type SpriteScreenshotOptions struct {
@@ -23,6 +24,9 @@ func (e *Encoder) SpriteScreenshot(probeResult VideoFile, options SpriteScreensh
 		"-f", "rawvideo",
 		"-",
 	}
+
+	//logger.Infof("%s", args)
+
 	data, err := e.run(probeResult.Path, args, nil)
 	if err != nil {
 		return nil, err
