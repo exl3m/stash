@@ -23,6 +23,7 @@
     "create_entity": "Skapa {entityType}",
     "create_marker": "Skapa markör",
     "created_entity": "Skapade {entity_type}: {entity_name}",
+    "customise": "Ändra",
     "delete": "Radera",
     "delete_entity": "Radera {entityType}",
     "delete_file": "Radera fil",
@@ -100,6 +101,7 @@
     "stop": "Stoppa",
     "submit": "Skicka",
     "submit_stash_box": "Skicka till Stash-Box",
+    "submit_update": "Skicka uppdatering",
     "tasks": {
       "clean_confirm_message": "Är du säker att du vill rensa? Detta kommer radera databasinformation och genererade filer för alla scener och gallerier som inte längre finns på filsystemet.",
       "dry_mode_selected": "Torrt läge valt. Inget kommer raderas utan bara loggning kommer ske.",
@@ -121,6 +123,7 @@
   "birth_year": "Födelseår",
   "birthdate": "Födelsedatum",
   "bitrate": "Bithastighet",
+  "captions": "Undertexter",
   "career_length": "Karriärlängd",
   "component_tagger": {
     "config": {
@@ -157,7 +160,7 @@
       "match_failed_already_tagged": "Scen redan taggad",
       "match_failed_no_result": "Inga resultat hittades",
       "match_success": "Scen taggad",
-      "phash_matches": "{count] PHashar matchar",
+      "phash_matches": "{count} PHashar matchar",
       "unnamed": "Namnlös"
     },
     "verb_match_fp": "Matcha fingeravtryck",
@@ -449,6 +452,16 @@
         "description": "Tidsfördröjning i millisekunder för interaktiva skripter.",
         "heading": "Funscript fördröjning (ms)"
       },
+      "handy_connection": {
+        "connect": "Koppla ihop",
+        "server_offset": {
+          "heading": "Serverförskjutning"
+        },
+        "status": {
+          "heading": "Handy Uppkopplingsstatus"
+        },
+        "sync": "Synka"
+      },
       "handy_connection_key": {
         "description": "Handy anslutningsnyckel för interaktiva scener. Denna nyckel kommer låta Stash dela din nuvarande sceninformation med handyfeeling.com",
         "heading": "Handy Uppkopplingsnyckel"
@@ -522,9 +535,13 @@
           "toggle_sound": "Aktivera ljud"
         }
       },
+      "scroll_attempts_before_change": {
+        "description": "Antal gånger att försöka bläddra innan flytt till nästa/tidigare objekt. Används bara för Pan Y-läget.",
+        "heading": "Bläddringsförsök innan flytt"
+      },
       "slideshow_delay": {
         "description": "Bildspel är tillgängligt för gallerier i väggvisningsläge",
-        "heading": "Bildspelsfördröjning"
+        "heading": "Bildspelsfördröjning (sekunder)"
       },
       "title": "Användargränssnitt"
     }
@@ -701,6 +718,7 @@
     "scale": "Skala",
     "warmth": "Värme"
   },
+  "empty_server": "Lägg till några scener i Stash för att se rekommendationer på denna sida.",
   "ethnicity": "Etnicitet",
   "existing_value": "existerande värde",
   "eye_color": "Ögonfärg",
@@ -717,6 +735,12 @@
   "filters": "Filter",
   "framerate": "Bildhastighet",
   "frames_per_second": "{value} bilder per sekund",
+  "front_page": {
+    "types": {
+      "premade_filter": "Förhandsgjorda filter",
+      "saved_filter": "Sparade Filter"
+    }
+  },
   "galleries": "Gallerier",
   "gallery": "Galleri",
   "gallery_count": "Antal Gallerier",
@@ -730,9 +754,19 @@
     "TRANSGENDER_MALE": "Trans Man"
   },
   "hair_color": "Hårfärg",
+  "handy_connection_status": {
+    "connecting": "Kopplar ihop",
+    "disconnected": "Kopplad isär",
+    "error": "Fel vid koppling till Handy",
+    "missing": "Saknas",
+    "ready": "Redo",
+    "syncing": "Synkar med server",
+    "uploading": "Laddar upp skript"
+  },
   "hasMarkers": "Har markörer",
   "height": "Längd",
   "help": "Hjälp",
+  "ignore_auto_tag": "Ignorera Autotagg",
   "image": "Bild",
   "image_count": "Antal bilder",
   "images": "Bilder",
@@ -834,6 +868,8 @@
   "queue": "Kö",
   "random": "Slumpad",
   "rating": "Betyg",
+  "recently_added_objects": "Nyligen Tillagda {objects}",
+  "recently_released_objects": "Nyligen Släppta {objects}",
   "resolution": "Upplösning",
   "scene": "Scen",
   "sceneTagger": "Scentaggaren",
@@ -935,8 +971,10 @@
     "go_review_draft": "Gå till {endpoint_name} för att granska utkast.",
     "selected_stash_box": "Vald stash-box adress",
     "submission_failed": "Misslyckad inskickning",
-    "submission_successful": "Lyckad inskickning"
+    "submission_successful": "Lyckad inskickning",
+    "submit_update": "Existerar redan i {endpoint_name}"
   },
+  "statistics": "Statistik",
   "stats": {
     "image_size": "Storlek på bilder",
     "scenes_duration": "Total speltid",
@@ -975,9 +1013,11 @@
   "total": "Total",
   "true": "Sant",
   "twitter": "Twitter",
+  "type": "Typ",
   "updated_at": "Uppdaterad vid",
   "url": "URL",
   "videos": "Videor",
+  "view_all": "Visa Allt",
   "weight": "Vikt",
   "years_old": "år gammal"
 }

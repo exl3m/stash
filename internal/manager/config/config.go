@@ -145,12 +145,15 @@ const (
 	defaultWallPlayback = "video"
 
 	// Image lightbox options
-	legacyImageLightboxSlideshowDelay = "slideshow_delay"
-	ImageLightboxSlideshowDelay       = "image_lightbox.slideshow_delay"
-	ImageLightboxDisplayMode          = "image_lightbox.display_mode"
-	ImageLightboxScaleUp              = "image_lightbox.scale_up"
-	ImageLightboxResetZoomOnNav       = "image_lightbox.reset_zoom_on_nav"
-	ImageLightboxScrollMode           = "image_lightbox.scroll_mode"
+	legacyImageLightboxSlideshowDelay       = "slideshow_delay"
+	ImageLightboxSlideshowDelay             = "image_lightbox.slideshow_delay"
+	ImageLightboxDisplayMode                = "image_lightbox.display_mode"
+	ImageLightboxScaleUp                    = "image_lightbox.scale_up"
+	ImageLightboxResetZoomOnNav             = "image_lightbox.reset_zoom_on_nav"
+	ImageLightboxScrollMode                 = "image_lightbox.scroll_mode"
+	ImageLightboxScrollAttemptsBeforeChange = "image_lightbox.scroll_attempts_before_change"
+
+	UI = "ui"
 
 	defaultImageLightboxSlideshowDelay = 5000
 
@@ -955,6 +958,9 @@ func (i *Instance) GetImageLightboxOptions() models.ConfigImageLightboxResult {
 		mode := models.ImageLightboxScrollMode(v.GetString(ImageLightboxScrollMode))
 		ret.ScrollMode = &mode
 	}
+	if v := i.viperWith(ImageLightboxScrollAttemptsBeforeChange); v != nil {
+		ret.ScrollAttemptsBeforeChange = v.GetInt(ImageLightboxScrollAttemptsBeforeChange)
+	}
 
 	return ret
 }
@@ -965,6 +971,26 @@ func (i *Instance) GetDisableDropdownCreate() *models.ConfigDisableDropdownCreat
 		Studio:    i.getBool(DisableDropdownCreateStudio),
 		Tag:       i.getBool(DisableDropdownCreateTag),
 	}
+}
+
+func (i *Instance) GetUIConfiguration() map[string]interface{} {
+	i.RLock()
+	defer i.RUnlock()
+
+	// HACK: viper changes map keys to case insensitive values, so the workaround is to
+	// convert map keys to snake case for storage
+	v := i.viper(UI).GetStringMap(UI)
+
+	return fromSnakeCaseMap(v)
+}
+
+func (i *Instance) SetUIConfiguration(v map[string]interface{}) {
+	i.RLock()
+	defer i.RUnlock()
+
+	// HACK: viper changes map keys to case insensitive values, so the workaround is to
+	// convert map keys to snake case for storage
+	i.viper(UI).Set(UI, toSnakeCaseMap(v))
 }
 
 func (i *Instance) GetCSSPath() string {

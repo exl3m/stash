@@ -6,6 +6,7 @@ import {
 } from "src/models/list-filter/criteria/criterion";
 import { useIntl } from "react-intl";
 import { Icon } from "../Shared";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 interface IFilterTagsProps {
   criteria: Criterion<CriterionValue>[];
@@ -48,13 +49,15 @@ export const FilterTags: React.FC<IFilterTagsProps> = ({
           variant="secondary"
           onClick={($event) => onRemoveCriterionTag(criterion, $event)}
         >
-          <Icon icon="times" />
+          <Icon icon={faTimes} />
         </Button>
       </Badge>
     ));
   }
 
   return (
-    <div className="d-flex justify-content-center">{renderFilterTags()}</div>
+    <div className="d-flex justify-content-center mb-2 wrap-tags">
+      {renderFilterTags()}
+    </div>
   );
 };

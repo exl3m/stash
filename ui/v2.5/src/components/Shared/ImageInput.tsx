@@ -8,8 +8,9 @@ import {
   Row,
 } from "react-bootstrap";
 import { useIntl } from "react-intl";
-import { Modal } from ".";
+import Modal from "./Modal";
 import Icon from "./Icon";
+import { faFile, faLink } from "@fortawesome/free-solid-svg-icons";
 
 interface IImageInput {
   isEditing: boolean;
@@ -17,6 +18,10 @@ interface IImageInput {
   onImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onImageURL?: (url: string) => void;
   acceptSVG?: boolean;
+}
+
+function acceptExtensions(acceptSVG: boolean = false) {
+  return `.jpg,.jpeg,.png,.webp,.gif${acceptSVG ? ",.svg" : ""}`;
 }
 
 export const ImageInput: React.FC<IImageInput> = ({
@@ -42,7 +47,7 @@ export const ImageInput: React.FC<IImageInput> = ({
         <Form.Control
           type="file"
           onChange={onImageChange}
-          accept={`.jpg,.jpeg,.png${acceptSVG ? ",.svg" : ""}`}
+          accept={acceptExtensions(acceptSVG)}
         />
       </Form.Label>
     );
@@ -96,19 +101,19 @@ export const ImageInput: React.FC<IImageInput> = ({
           <div>
             <Form.Label className="image-input">
               <Button variant="secondary">
-                <Icon icon="file" className="fa-fw" />
+                <Icon icon={faFile} className="fa-fw" />
                 <span>{intl.formatMessage({ id: "actions.from_file" })}</span>
               </Button>
               <Form.Control
                 type="file"
                 onChange={onImageChange}
-                accept={`.jpg,.jpeg,.png${acceptSVG ? ",.svg" : ""}`}
+                accept={acceptExtensions(acceptSVG)}
               />
             </Form.Label>
           </div>
           <div>
             <Button className="minimal" onClick={() => setIsShowDialog(true)}>
-              <Icon icon="link" className="fa-fw" />
+              <Icon icon={faLink} className="fa-fw" />
               <span>{intl.formatMessage({ id: "actions.from_url" })}</span>
             </Button>
           </div>

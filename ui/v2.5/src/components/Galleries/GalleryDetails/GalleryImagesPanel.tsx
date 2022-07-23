@@ -8,7 +8,7 @@ import { showWhenSelected, PersistanceLevel } from "src/hooks/ListHook";
 import { useToast } from "src/hooks";
 import { TextUtils } from "src/utils";
 import { useIntl } from "react-intl";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faMinus } from "@fortawesome/free-solid-svg-icons";
 
 interface IGalleryDetailsProps {
   gallery: GQL.GalleryDataFragment;
@@ -65,10 +65,15 @@ export const GalleryImagesPanel: React.FC<IGalleryDetailsProps> = ({
         gallery_id: gallery.id!,
         image_ids: Array.from(selectedIds.values()),
       });
+
       Toast.success({
         content: intl.formatMessage(
-          { id: "toast.added_entity" },
-          { entity: intl.formatMessage({ id: "images" }) }
+          { id: "toast.removed_entity" },
+          {
+            count: selectedIds.size,
+            singularEntity: intl.formatMessage({ id: "image" }),
+            pluralEntity: intl.formatMessage({ id: "images" }),
+          }
         ),
       });
     } catch (e) {
@@ -82,7 +87,7 @@ export const GalleryImagesPanel: React.FC<IGalleryDetailsProps> = ({
       onClick: removeImages,
       isDisplayed: showWhenSelected,
       postRefetch: true,
-      icon: "minus" as IconProp,
+      icon: faMinus,
       buttonVariant: "danger",
     },
   ];

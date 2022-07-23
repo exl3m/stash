@@ -6,6 +6,7 @@ import { Modal } from "src/components/Shared";
 import { useToast } from "src/hooks";
 import { ConfigurationContext } from "src/hooks/Config";
 import { FormattedMessage, useIntl } from "react-intl";
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 
 interface IDeleteSceneDialogProps {
   selected: GQL.SlimSceneDataFragment[];
@@ -60,11 +61,12 @@ export const DeleteScenesDialog: React.FC<IDeleteSceneDialogProps> = (
     try {
       await deleteScene();
       Toast.success({ content: toastMessage });
+      props.onClose(true);
     } catch (e) {
       Toast.error(e);
+      props.onClose(false);
     }
     setIsDeleting(false);
-    props.onClose(true);
   }
 
   function funscriptPath(scenePath: string) {
@@ -124,7 +126,7 @@ export const DeleteScenesDialog: React.FC<IDeleteSceneDialogProps> = (
   return (
     <Modal
       show
-      icon="trash-alt"
+      icon={faTrashAlt}
       header={header}
       accept={{
         variant: "danger",
@@ -161,3 +163,5 @@ export const DeleteScenesDialog: React.FC<IDeleteSceneDialogProps> = (
     </Modal>
   );
 };
+
+export default DeleteScenesDialog;

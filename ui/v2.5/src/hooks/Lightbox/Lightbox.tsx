@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import cx from "classnames";
 import Mousetrap from "mousetrap";
-import debounce from "lodash/debounce";
+import debounce from "lodash-es/debounce";
 
 import { Icon, LoadingIndicator } from "src/components/Shared";
 import { useInterval, usePageVisibility, useToast } from "src/hooks";
@@ -29,6 +29,19 @@ import {
 import * as GQL from "src/core/generated-graphql";
 import { useInterfaceLocalForage } from "../LocalForage";
 import { imageLightboxDisplayModeIntlMap } from "src/core/enums";
+import { ILightboxImage } from "./types";
+import {
+  faArrowLeft,
+  faArrowRight,
+  faChevronLeft,
+  faChevronRight,
+  faCog,
+  faExpand,
+  faPause,
+  faPlay,
+  faSearchMinus,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 
 const CLASSNAME = "Lightbox";
 const CLASSNAME_HEADER = `${CLASSNAME}-header`;
@@ -52,18 +65,6 @@ const CLASSNAME_NAVSELECTED = `${CLASSNAME_NAV}-selected`;
 const DEFAULT_SLIDESHOW_DELAY = 5000;
 const SECONDS_TO_MS = 1000;
 const MIN_VALID_INTERVAL_SECONDS = 1;
-
-interface IImagePaths {
-  image?: GQL.Maybe<string>;
-  thumbnail?: GQL.Maybe<string>;
-}
-export interface ILightboxImage {
-  id?: string;
-  title?: GQL.Maybe<string>;
-  rating?: GQL.Maybe<number>;
-  o_counter?: GQL.Maybe<number>;
-  paths: IImagePaths;
-}
 
 interface IProps {
   images: ILightboxImage[];
@@ -157,6 +158,11 @@ export const LightboxComponent: React.FC<IProps> = ({
 
   const slideshowDelay =
     savedDelay ?? configuredDelay ?? DEFAULT_SLIDESHOW_DELAY;
+
+  const scrollAttemptsBeforeChange = Math.max(
+    0,
+    config?.interface.imageLightbox.scrollAttemptsBeforeChange ?? 0
+  );
 
   function setSlideshowDelay(v: number) {
     setLightboxSettings({ slideshowDelay: v });
@@ -274,8 +280,11 @@ export const LightboxComponent: React.FC<IProps> = ({
     }
   }, [slideshowInterval, slideshowDelay]);
 
-  usePageVisibility(() => {
-    toggleSlideshow();
+  // stop slideshow when the page is hidden
+  usePageVisibility((hidden: boolean) => {
+    if (hidden) {
+      setSlideshowInterval(null);
+    }
   });
 
   const close = useCallback(() => {
@@ -635,7 +644,7 @@ export const LightboxComponent: React.FC<IProps> = ({
                 })}
                 onClick={() => setShowOptions(!showOptions)}
               >
-                <Icon icon="cog" />
+                <Icon icon={faCog} />
               </Button>
               <Overlay
                 target={overlayTarget.current}
@@ -671,7 +680,7 @@ export const LightboxComponent: React.FC<IProps> = ({
               onClick={toggleSlideshow}
               title="Toggle Slideshow"
             >
-              <Icon icon={slideshowInterval !== null ? "pause" : "play"} />
+              <Icon icon={slideshowInterval !== null ? faPause : faPlay} />
             </Button>
           )}
           {zoom !== 1 && (
@@ -683,7 +692,7 @@ export const LightboxComponent: React.FC<IProps> = ({
               }}
               title="Reset zoom"
             >
-              <Icon icon="search-minus" />
+              <Icon icon={faSearchMinus} />
             </Button>
           )}
           {document.fullscreenEnabled && (
@@ -692,11 +701,11 @@ export const LightboxComponent: React.FC<IProps> = ({
               onClick={toggleFullscreen}
               title="Toggle Fullscreen"
             >
-              <Icon icon="expand" />
+              <Icon icon={faExpand} />
             </Button>
           )}
           <Button variant="link" onClick={() => close()} title="Close Lightbox">
-            <Icon icon="times" />
+            <Icon icon={faTimes} />
           </Button>
         </div>
       </div>
@@ -707,7 +716,7 @@ export const LightboxComponent: React.FC<IProps> = ({
             onClick={handleLeft}
             className={`${CLASSNAME_NAVBUTTON} d-none d-lg-block`}
           >
-            <Icon icon="chevron-left" />
+            <Icon icon={faChevronLeft} />
           </Button>
         )}
 
@@ -733,6 +742,8 @@ export const LightboxComponent: React.FC<IProps> = ({
                   onRight={handleRight}
                   alignBottom={movingLeft}
                   zoom={i === currentIndex ? zoom : 1}
+                  current={i === currentIndex}
+                  scrollAttemptsBeforeChange={scrollAttemptsBeforeChange}
                   setZoom={(v) => setZoom(v)}
                   resetPosition={resetPosition}
                 />
@@ -747,7 +758,7 @@ export const LightboxComponent: React.FC<IProps> = ({
             onClick={handleRight}
             className={`${CLASSNAME_NAVBUTTON} d-none d-lg-block`}
           >
-            <Icon icon="chevron-right" />
+            <Icon icon={faChevronRight} />
           </Button>
         )}
       </div>
@@ -758,7 +769,7 @@ export const LightboxComponent: React.FC<IProps> = ({
             onClick={() => setIndex(images.length - 1)}
             className={CLASSNAME_NAVBUTTON}
           >
-            <Icon icon="arrow-left" className="mr-4" />
+            <Icon icon={faArrowLeft} className="mr-4" />
           </Button>
           {navItems}
           <Button
@@ -766,7 +777,7 @@ export const LightboxComponent: React.FC<IProps> = ({
             onClick={() => setIndex(0)}
             className={CLASSNAME_NAVBUTTON}
           >
-            <Icon icon="arrow-right" className="ml-4" />
+            <Icon icon={faArrowRight} className="ml-4" />
           </Button>
         </div>
       )}
@@ -803,3 +814,5 @@ export const LightboxComponent: React.FC<IProps> = ({
     </div>
   );
 };
+
+export default LightboxComponent;

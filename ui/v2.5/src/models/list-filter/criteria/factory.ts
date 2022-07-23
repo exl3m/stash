@@ -43,6 +43,7 @@ import { CriterionType } from "../types";
 import { InteractiveCriterion } from "./interactive";
 import { RatingCriterionOption } from "./rating";
 import { DuplicatedCriterion, PhashCriterionOption } from "./phash";
+import { CaptionCriterion } from "./captions";
 
 export function makeCriteria(type: CriterionType = "none") {
   switch (type) {
@@ -50,9 +51,12 @@ export function makeCriteria(type: CriterionType = "none") {
       return new NoneCriterion();
     case "name":
     case "path":
-    case "checksum":
       return new StringCriterion(
         new MandatoryStringCriterionOption(type, type)
+      );
+    case "checksum":
+      return new StringCriterion(
+        new MandatoryStringCriterionOption("media_info.checksum", type, type)
       );
     case "oshash":
       return new StringCriterion(
@@ -133,7 +137,7 @@ export function makeCriteria(type: CriterionType = "none") {
     case "sceneChecksum":
     case "galleryChecksum":
       return new StringCriterion(
-        new StringCriterionOption("checksum", type, "checksum")
+        new StringCriterionOption("media_info.checksum", type, "checksum")
       );
     case "phash":
       return new StringCriterion(PhashCriterionOption);
@@ -159,6 +163,8 @@ export function makeCriteria(type: CriterionType = "none") {
       return new StringCriterion(new StringCriterionOption(type, type));
     case "interactive":
       return new InteractiveCriterion();
+    case "captions":
+      return new CaptionCriterion();
     case "parent_tag_count":
       return new NumberCriterion(
         new MandatoryNumberCriterionOption(

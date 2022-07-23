@@ -23,6 +23,7 @@
     "create_entity": "Crear {entityType}",
     "create_marker": "Crear marcador",
     "created_entity": "{entity_type} creado: {entity_name}",
+    "customise": "Personalizar",
     "delete": "Eliminar",
     "delete_entity": "Eliminar {entityType}",
     "delete_file": "Eliminar archivo",
@@ -100,6 +101,7 @@
     "stop": "Parar",
     "submit": "Enviar",
     "submit_stash_box": "Enviar a Stash-Box",
+    "submit_update": "Enviar Actualización",
     "tasks": {
       "clean_confirm_message": "¿Estás seguro que quieres iniciar la limpieza? Esto eliminará la información en la base de datos, y el contenido generado para todas las escenas y galerías que ya no estén disponibles en el sistema de ficheros.",
       "dry_mode_selected": "Modo de simulación seleccionado. No se eliminará información, solo se guardarán registros de las acciones a realizar.",
@@ -107,6 +109,7 @@
     },
     "temp_disable": "Deshabilitar temporalmente…",
     "temp_enable": "Habilitar temporalmente…",
+    "unset": "Desactivar",
     "use_default": "Predeterminada",
     "view_random": "Ver aleatoria"
   },
@@ -120,6 +123,7 @@
   "birth_year": "Año de nacimiento",
   "birthdate": "Cumpleaños",
   "bitrate": "Tasa de bits",
+  "captions": "Subtítulos",
   "career_length": "Años en activo",
   "component_tagger": {
     "config": {
@@ -448,6 +452,10 @@
         "description": "Tiempo de compensación en milisegundos para la reproducción de scripts interactivos.",
         "heading": "Tiempo de compensación Funscript (mseg)"
       },
+      "handy_connection": {
+        "connect": "Conectar",
+        "sync": "Sincronizar"
+      },
       "handy_connection_key": {
         "description": "Clave para conexión práctica que se usará en las escenas interactivas. Configurar esta clave permitirá a Stash compartir la información actual de las escenas con handyfeeling.com",
         "heading": "Clave para conexión práctica"
@@ -523,7 +531,7 @@
       },
       "slideshow_delay": {
         "description": "La presentación de diapositivas estará disponible en las galerías al seleccionar el muro como modo de visualización",
-        "heading": "Retardo en la presentación de diapositivas"
+        "heading": "Retardo en la presentación de diapositivas (segundos)"
       },
       "title": "Interfaz de usuario"
     }
@@ -701,6 +709,7 @@
     "warmth": "Calidez"
   },
   "ethnicity": "Origen étnico",
+  "existing_value": "valor existente",
   "eye_color": "Color de ojos",
   "fake_tits": "Pecho operado",
   "false": "No",
@@ -728,9 +737,17 @@
     "TRANSGENDER_MALE": "Varón transgénero"
   },
   "hair_color": "Color de pelo",
+  "handy_connection_status": {
+    "connecting": "Conectando",
+    "disconnected": "Desconectado",
+    "missing": "El archivo no esta disponsible",
+    "ready": "Conexion Preparada",
+    "syncing": "Sincronizando con el servidor"
+  },
   "hasMarkers": "Tiene marcadores",
   "height": "Estatura",
   "help": "Ayuda",
+  "ignore_auto_tag": "Ignorar Etiquetado Automático",
   "image": "Imagen",
   "image_count": "Número de imágenes",
   "images": "Imágenes",
